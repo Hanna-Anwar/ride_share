@@ -25,9 +25,10 @@ from user_app.views import RegisterLoginViewSet
 urlpatterns = [
 
     path('admin/', admin.site.urls),
-    path("login/", TokenObtainPairView.as_view(), name="login"),
-    path("refresh/", TokenRefreshView.as_view(), name="refresh"),
-    path("api/",include("user_app.urls"))
+    path("api/",include("user_app.urls")),
+    path('api/',include("ride_app.urls")),
+    path('refresh/',TokenRefreshView.as_view()),
+    
 
     # include() is used to connect app urls to project urls.
 

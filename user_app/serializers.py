@@ -35,3 +35,13 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         return user
         
+
+class ProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = Profile
+
+        exclude = ("user",)
+
+        
