@@ -14,9 +14,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from ride_app.models import RideModel
 
-from ride_app.serializers import (
-    RideCreateSerializer, RideSerializer, RideStatusSerializer, TrackSerializer
-)
+from ride_app.serializers import * 
+
 
 from ride_app.permissions import IsDriver
 
@@ -58,7 +57,7 @@ class RideViewSet(viewsets.ModelViewSet):
 
         serializer.save(rider=self.request.user)
 
-    # --- Ride Status Updates ---
+    # Ride Status Updates 
     @action(detail=True, methods=["patch"], url_path="status")
 
     def status(self, request, pk=None):
@@ -67,7 +66,7 @@ class RideViewSet(viewsets.ModelViewSet):
 
         if request.user.id not in [ride.rider_id, ride.driver_id]:
 
-            return Response({"detail": "Not allowed."}, status=403)
+            return Response({"detail": "Not allowed."}, status=status.HTTP_403_FORBIDDEN)
 
         user = RideStatusSerializer(data=request.data)
 
@@ -75,7 +74,7 @@ class RideViewSet(viewsets.ModelViewSet):
 
         if ride.status in ["completed", "cancelled"]:
 
-            return Response({"detail": "Ride already ended."}, status=400)
+            return Response({"detail": "Ride already ended."}, status=status.HTTP_400_BAD_REQUEST)
 
         ride.status = user.validated_data["status"]
 
@@ -83,7 +82,7 @@ class RideViewSet(viewsets.ModelViewSet):
 
         return Response(RideSerializer(ride).data)
 
-    # ✅ Driver accepts a ride manually
+    # Driver accepts a ride manually
     @action(detail=True, methods=["post"], url_path="accept", permission_classes=[IsDriver])
     def accept(self, request, pk=None):
 
@@ -97,7 +96,6 @@ class RideViewSet(viewsets.ModelViewSet):
 
         ride.status = "accepted"
 
-        #Use DRIVER profile location (not pickup)
         plat = getattr(request.user.profile, "current_latitude", None)
 
         plng = getattr(request.user.profile, "current_longitude", None)
@@ -112,7 +110,7 @@ class RideViewSet(viewsets.ModelViewSet):
 
         return Response(RideSerializer(ride).data)
 
-    # Match nearest driver AND ASSIGN driver + ACCEPT + SAVE
+    # Match nearest driver driver assignining
     @action(detail=True, methods=["post"], url_path="match")
     def match(self, request, pk=None):
 
@@ -126,7 +124,7 @@ class RideViewSet(viewsets.ModelViewSet):
 
             return Response({"detail": "pickup_lat & pickup_lng required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # drivers already busy
+        #  busy  drivers
         active_driver_ids = RideModel.objects.filter(
             status__in=["accepted", "started"]
         ).exclude(driver=None).values_list("driver_id", flat=True)
@@ -158,7 +156,6 @@ class RideViewSet(viewsets.ModelViewSet):
 
             return Response({"detail": "No available drivers found."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # ASSIGN + ACCEPT + SAVE
         ride.driver = best_driver
 
         ride.status = "accepted"
