@@ -37,7 +37,14 @@ class RideViewSet(viewsets.ModelViewSet):
 
         user = self.request.user
 
-        return self.queryset.filter(Q(rider=user) | Q(driver=user))
+        qs = self.queryset.filter(Q(rider=user) | Q(driver=user))
+
+        if hasattr(user, "profile") and getattr(user.profile, "is_driver", False):
+
+          qs = qs | self.queryset.filter(driver__isnull=True, status="requested")
+
+        return qs
+
 
     def get_serializer_class(self):
 

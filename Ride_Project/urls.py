@@ -27,8 +27,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path("api/",include("user_app.urls")),
     path('api/',include("ride_app.urls")),
-    path('refresh/',TokenRefreshView.as_view()),
+    # path('refresh/',TokenRefreshView.as_view()),
     
+    path("api/jwt/login/", TokenObtainPairView.as_view(), name="jwt_login"),
+    path("api/jwt/refresh/", TokenRefreshView.as_view(), name="jwt_refresh")
 
     # include() is used to connect app urls to project urls.
 
