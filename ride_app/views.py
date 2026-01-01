@@ -185,7 +185,7 @@ class RideViewSet(viewsets.ModelViewSet):
 
         if request.user.id not in [ride.rider_id, ride.driver_id]:
 
-            return Response({"detail": "Not allowed."}, status=403)
+            return Response({"detail": "Not allowed."}, status=status.HTTP_403_FORBIDDEN)
 
         return Response(
             {
@@ -204,7 +204,7 @@ class RideViewSet(viewsets.ModelViewSet):
 
         if ride.driver_id != request.user.id:
 
-            return Response({"detail": "Only assigned driver can update."}, status=403)
+            return Response({"detail": "Only assigned driver can update."}, status=status.HTTP_403_FORBIDDEN)
 
         user = TrackSerializer(data=request.data)
 
@@ -228,4 +228,4 @@ class RideViewSet(viewsets.ModelViewSet):
 
         request.user.profile.save(update_fields=["current_latitude", "current_longitude"])
 
-        return Response({"detail": "Location updated."}, status=200)
+        return Response({"detail": "Location updated."}, status=status.HTTP_200_OK)
