@@ -193,7 +193,7 @@ class RideViewSet(viewsets.ModelViewSet):
 
         ride.save(update_fields=["current_lat", "current_lng", "updated_at"])
 
-        # ALSO update driver PROFILE location 
+        # also update driver profile location 
         request.user.profile.current_latitude = lat
         
         request.user.profile.current_longitude = lng
