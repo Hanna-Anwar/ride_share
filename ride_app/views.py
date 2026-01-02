@@ -16,7 +16,6 @@ from ride_app.models import RideModel
 
 from ride_app.serializers import * 
 
-
 from ride_app.permissions import IsDriver
 
 from ride_app.utils import distance_km
@@ -82,35 +81,8 @@ class RideViewSet(viewsets.ModelViewSet):
 
         return Response(RideSerializer(ride).data)
 
-    # Driver accepts a ride manually
-    @action(detail=True, methods=["post"], url_path="accept", permission_classes=[IsDriver])
-    def accept(self, request, pk=None):
 
-        ride = self.get_object()
-
-        if ride.status != "requested":
-
-            return Response({"detail": "Not available"}, status=status.HTTP_400_BAD_REQUEST)
-
-        ride.driver = request.user
-
-        ride.status = "accepted"
-
-        plat = getattr(request.user.profile, "current_latitude", None)
-
-        plng = getattr(request.user.profile, "current_longitude", None)
-
-        if plat is not None and plng is not None:
-
-            ride.current_lat = float(plat)
-
-            ride.current_lng = float(plng)
-
-        ride.save(update_fields=["driver", "status", "current_lat", "current_lng", "updated_at"])
-
-        return Response(RideSerializer(ride).data)
-
-    # Match nearest driver driver assignining
+    # Match nearest driver assignining
     @action(detail=True, methods=["post"], url_path="match")
     def match(self, request, pk=None):
 
@@ -174,7 +146,7 @@ class RideViewSet(viewsets.ModelViewSet):
                 "matched_driver_username": best_driver.username,
                 "distance_km": round(best_dist, 2),
             },
-            status=200
+            status=status.HTTP_200_OK
         )
 
     # Rider/Driver can view tracking
@@ -221,7 +193,7 @@ class RideViewSet(viewsets.ModelViewSet):
 
         ride.save(update_fields=["current_lat", "current_lng", "updated_at"])
 
-        # ALSO update driver PROFILE location (so next match uses latest)
+        # ALSO update driver PROFILE location 
         request.user.profile.current_latitude = lat
         
         request.user.profile.current_longitude = lng
